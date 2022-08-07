@@ -19,7 +19,7 @@ public class OneTableQueueFactory<T> : SqlPriorityQueueFactory<T>
         };
     }
     
-    public override async Task<Queue<T>> GetQueueAsync(string name, PriorityOrder order = PriorityOrder.Desc,
+    public override async Task<PriorityQueue<T>> GetQueueAsync(string name, PriorityOrder order = PriorityOrder.Desc,
         int defaultPriority = 0)
     {
         if (!await VerifyTableExists(name, _tableSchema).ConfigureAwait(false))

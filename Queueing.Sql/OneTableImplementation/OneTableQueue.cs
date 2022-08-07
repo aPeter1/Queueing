@@ -26,8 +26,9 @@ public class OneTableQueue<T> : SqlPriorityQueue<T>
 	                where status = '{QueueItemStatus.New}'
 	                order by priority {Order}
                 )
-                delete top_row
-                output deleted.message
+                update top_row
+                set status = '{QueueItemStatus.Pending}'
+                output inserted.message
                 from top_row", connection, transaction);
             await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
 

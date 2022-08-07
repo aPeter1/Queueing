@@ -3,11 +3,12 @@
 using System.Data.SqlClient;
 using Queueing.Sql.OneTableImplementation;
 using Queueing.Sql.Sql;
+using Queueing.Sql.TwoTableImplementation;
 
 var connectionString = "Data Source=alec-precision\\brevium2012;Initial Catalog=Testing;user id=sa;password=Brevium2;";
 
 var factory = new OneTableQueueFactory<Item>(connectionString, 100);
-var queue = await factory.GetQueueAsync("item_queue_2").ConfigureAwait(false);
+var queue = await factory.GetQueueAsync("new_item_queue").ConfigureAwait(false);
 
 var watch = new System.Diagnostics.Stopwatch();
 var reps = 10000;
@@ -24,7 +25,7 @@ for(var i = 0; i < reps; i++)
     {
         Other = i,
         Thing = $"This is my data! {i}"
-    }).ConfigureAwait(false);
+    }, i).ConfigureAwait(false);
 }
 watch.Stop();
 Console.WriteLine($"Execution Time Enqueue: {watch.ElapsedMilliseconds} ms");

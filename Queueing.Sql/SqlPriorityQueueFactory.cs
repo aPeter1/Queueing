@@ -4,7 +4,7 @@ using Queueing.Sql.Sql;
 
 namespace Queueing.Sql;
 
-public abstract class SqlPriorityQueueFactory<T> : IQueueFactory<T>
+public abstract class SqlPriorityQueueFactory<T> : PriorityQueueFactory<T>
 {
     protected readonly SqlHelper SqlHelper;
     protected readonly int MaxDataLength;
@@ -15,19 +15,6 @@ public abstract class SqlPriorityQueueFactory<T> : IQueueFactory<T>
         MaxDataLength = maxDataLength;
     }
     
-    public Task<Queue<T>> GetQueueAsync(PriorityOrder order = PriorityOrder.Desc, int defaultPriority = 0)
-    {
-        return GetQueueAsync(QueueNameFromType(), order, defaultPriority);
-    }
-
-    public abstract Task<Queue<T>> GetQueueAsync(string name, PriorityOrder order = PriorityOrder.Desc,
-        int defaultPriority = 0);
-    
-    private static string QueueNameFromType()
-    {
-        return typeof(T).ToString().ToLower() + "_queue";
-    }
-
     private async Task<bool> CheckIfTableExists(string name)
     {
         await using var connection = SqlHelper.GetSqlConnection();
