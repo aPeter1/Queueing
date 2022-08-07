@@ -48,14 +48,11 @@ public class OneTableQueueFactory<T> : SqlPriorityQueueFactory<T>
             
             await using var constraintCommand = new SqlCommand(
                 $@"
-                    CREATE UNIQUE CLUSTERED INDEX [PK_{name}] ON {name}
-                (
-                    [id] ASC
-                )
                     CREATE NONCLUSTERED INDEX [IX_{name}] ON {name}
                 (
-                    [priority] {priority},
-                    [status] {priority}
+                    [status] {priority},
+                    [priority] {priority}
+                    
                 )"
                 , connection);
             await constraintCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
