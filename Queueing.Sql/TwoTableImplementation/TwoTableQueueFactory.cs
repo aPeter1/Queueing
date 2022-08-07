@@ -25,14 +25,14 @@ public class TwoTableQueueFactory<T> : SqlPriorityQueueFactory<T>
         };
     }
     
-    public override async Task<Queue<T>> GetQueueAsync(string name, PriorityOrder order = PriorityOrder.Desc, 
+    public override async Task<PriorityQueue<T>> GetQueueAsync(string name, PriorityOrder order = PriorityOrder.Desc, 
         int defaultPriority = 0)
     {
         if (!await VerifyTableExists("data_" + name, _dataTableSchema).ConfigureAwait(false))
-            await CreateDataTable(name).ConfigureAwait(false);
+            await CreateDataTable("data_" + name).ConfigureAwait(false);
         
         if (!await VerifyTableExists("meta_" + name, _metaTableSchema).ConfigureAwait(false))
-            await CreateMetaTable(name, order).ConfigureAwait(false);
+            await CreateMetaTable("meta_" + name, order).ConfigureAwait(false);
         
         return new TwoTableQueue<T>(name, order, SqlHelper, defaultPriority);
     }
@@ -89,12 +89,7 @@ public class TwoTableQueueFactory<T> : SqlPriorityQueueFactory<T>
             await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             
             await using var constraintCommand = new SqlCommand(
-                $@"
-                ALTER TABLE {name} ADD  CONSTRAINT [PK_{name}] PRIMARY KEY CLUSTERED
-                (
-                    [id] ASC
-                )
-                    CREATE NONCLUSTERED INDEX [IX_{name}] ON {name}
+                $@"CREATE NONCLUSTERED INDEX [IX_{name}] ON {name}
                 (
                     [priority] {order},
                     [status] {order}
