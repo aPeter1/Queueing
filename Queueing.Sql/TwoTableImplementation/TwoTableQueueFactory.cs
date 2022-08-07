@@ -91,8 +91,8 @@ public class TwoTableQueueFactory<T> : SqlPriorityQueueFactory<T>
             await using var constraintCommand = new SqlCommand(
                 $@"CREATE NONCLUSTERED INDEX [IX_{name}] ON {name}
                 (
-                    [priority] {order},
-                    [status] {order}
+                    [status] {order},
+                    [priority] {order}
                 )"
                 , connection);
             await constraintCommand.ExecuteNonQueryAsync().ConfigureAwait(false);

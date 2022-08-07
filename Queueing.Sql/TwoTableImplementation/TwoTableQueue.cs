@@ -22,13 +22,15 @@ public class TwoTableQueue<T> : SqlPriorityQueue<T>
         {
             await using var command = new SqlCommand($@"
                 ;with top_row as (
-	                select top 1 * from {Name} with (rowlock, updlock, readpast)
+	                select top 1 id, status from {"meta_" + Name} with (rowlock, updlock, readpast)
 	                where status = '{QueueItemStatus.New}'
 	                order by priority {Order}
                 )
-                delete top_row
-                output deleted.message
-                from top_row", connection, transaction);
+                update top_row
+                set status = '{QueueItemStatus.Pending}'
+                output dq.message
+                from top_row tr
+                    inner join {"data_" + Name} dq on dq.id = tr.id", connection, transaction);
             await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
 
             if (reader.Read())
@@ -61,7 +63,7 @@ public class TwoTableQueue<T> : SqlPriorityQueue<T>
 
             var message = JsonSerializer.Serialize(item.Data);
             await using var command = new SqlCommand(
-                $@"insert into {"meta" + Name}
+                $@"insert into {"meta_" + Name}
                     (priority, status) values
                     ({item.Priority},'{item.Status}')
                     
@@ -69,9 +71,7 @@ public class TwoTableQueue<T> : SqlPriorityQueue<T>
 
                     insert into {"data_" + Name}
                     (id, message) values 
-                    (@id, '{message}');
-                        
-                   ", connection);
+                    (@id, '{message}');", connection);
 
             var rowsAffected = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 
